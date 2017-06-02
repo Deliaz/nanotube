@@ -8,6 +8,10 @@
   "permissions": [
     "tabs"
   ],
+  "browser_action": {
+    "default_title": "Google Mail",
+    "default_icon": "default-icon.png"
+  },
   "background": {
     "scripts": [
       "background.js"
@@ -16,11 +20,12 @@
   "content_scripts": [
     {
       "matches": [
-        "http://*.youtube.com/*"
+        "*://*.youtube.com/watch*"
       ],
       "js": [
         "content.js"
-      ]
+      ],
+      "run_at": "document_idle"
     }
   ]
 }
