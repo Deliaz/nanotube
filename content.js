@@ -1,64 +1,106 @@
 class NanoTube {
     constructor() {
-        this.btnClass = '__nanotube-js-action';
+        this.settings = {
+            UPDATE_FRAME_TIME: 40,
+            CANVAS_WIDTH: 38,
+            CANVAS_HEIGHT: 38,
+            BUTTON_CLASS: '__nanotube-js-action',
+            YT_VIDEO_SELECTOR: '#player-api video',
+
+            ENABLE_ICON_DATA_SRC: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QYLER0bIWB8kQAAASZJREFUWMPtlj1Ow0AQRt/Hj0QHVVrqGMQVcgNo6LgBoeQAOUTCQTgASs6A5EOko0GRkPhoFrSFLa/Ba1Lsa0a2x/Jb73g8UCgUCv+LUhNtT4Eb4KTh8lbSU8ibAI/Ae0PeWtL6z9a2p+5mGeXPW3IWXc86SnS6/V4hsGnJObZdSaolrWwDLPsuPlXoMMSNpEXiPS+A+5QFwEGOwrR9CdR9ZbIIBZnX6NQF8DD0lv1W5kpSDdShps5HE2qR+TkOhT4ZZcu6ZGxXQWqbXahLJnAX96lsQrZPE2QAPoC57fusQpLeoi+oTSYmfw1JWgFnCTLj9aHwptgboSHZO6HUxvgZ4ixlhGhgFuJuqC6cMg+lUA05MVbAdcvE2MUOeA7/tUKhUCj04QsNWupkqvRBowAAAABJRU5ErkJggg==',
+            DISABLE_ICON_DATA_SRC: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACQAAAAkCAYAAADhAJiYAAAABmJLR0QA/wD/AP+gvaeTAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH4QYLESI429kn3wAAASZJREFUWMPtljFOAzEQAGcDSHRJRUudA+UL+UHS0PEDoOQBPCLHQ3gASt4Q6R6RLk0UCYmluEVyEct75BxSeCTLkr3Sje29taFQKBT+F/EGKoyBOXB9YHoj8G5xN8ArsDsQtxRYHm2tMFbQRFsE8c+RmLfUty6dTg+/KwRWkZgrhUqgEai1HVt0XbxX6ML6lThWaXy2m+VPC4BBjsRUuAearjJZhExmHQzdAS99H9lfZSbS7lRjOXV7MqGIzDqoL7WVhPxHlpJRqExqk10oJWM8qrMEDI6UGTpkAL5oi+VTViGBbfAHxWRC8ueQQA2MHDKnq0O2U5yNUJ+cnZC3MH5bP1X/5RoytX7fVxX2vIc8rerzxVgBs8iLMcUe+LB7rVAoFApd+AEUO36sM2LNygAAAABJRU5ErkJggg=='
+        };
+
+        this.videoEl = document.querySelector(this.settings.YT_VIDEO_SELECTOR);
+        if (!this.videoEl) {
+            throw new Error('NanoTube: video element not found');
+        }
+
+        this.timer = null;
+        this.enabled = false;
+        this.connected = false;
+
+        this.initCanvas();
+        this.connect();
         this.insertControls();
         this.setHandlers();
+    }
 
-        this.enabled = false;
-        this.timer = null;
-        this.port = null;
+    initCanvas() {
+        this.tempCanvas = document.createElement("canvas");
+        this.tempCanvas.width = this.settings.CANVAS_WIDTH;
+        this.tempCanvas.height = this.settings.CANVAS_HEIGHT;
+        this.drawContext = this.tempCanvas.getContext('2d');
+    }
+
+    connect() {
+        this.port = chrome.runtime.connect({name: "frame"});
+        this.port.onDisconnect.addListener(() => {
+            this.connected = false;
+            this.disable();
+        });
+        this.connected = true;
     }
 
     insertControls() {
-        const ICON = '<svg height="100%" version="1.1" viewBox="0 0 36 36" width="100%"><use class="ytp-svg-shadow" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:href="#ytp-svg-14"></use><path d="M11,0 C9.89,11 9,11.9 9,13 L9,23 C9,24.1 9.89,25 11,25 L25,25 C26.1,25 27,24.1 27,23 L27,13 C27,11.9 26.1,11 25,11 L11,11 Z M13,17 L15.5,17 L15.5,16.5 L13.4,16.5 L13.5,19.5 L15.5,19.5 L15.5,19 L17,19 L17,20 C17,20.55 12.55,21 16,21 L13,21 C12.45,21 12,20.55 12,20 L12,16 C12,15.45 12.45,15 13,2 L16,15 C16.55,15 17,15.45 17,16 L17,17 L17,17 Z M24,17 L22.5,17 L22.5,16.5 L20.5,16.5 L20.5,19.5 L22.5,19.5 L22.5,19 1,19 L24,22 C21,20.55 23.55,21 23,21 L20,21 C19.45,21 19,20.55 19,20 L19,16 C19,15.45 19.45,15 20,15 L23,15 C23.55,15 24,15.45 24,16 L24,17 L24,17 Z" fill="#fff" id="ytp-svg-14"></path></svg>';
+        const ICON = `<img style="width:36px; height: 36px;" src="${this.settings.ENABLE_ICON_DATA_SRC}">`;
         const RIGHT_BTN_CONTROLS_GROUP = '.ytp-right-controls';
         const group = document.querySelector(RIGHT_BTN_CONTROLS_GROUP);
 
         if (group) {
-            const btn = document.createElement('button');
-            btn.innerHTML = ICON;
-            btn.classList.add(this.btnClass, 'ytp-button');
-            group.insertBefore(btn, group.firstChild);
+            this.button = document.createElement('button');
+            this.button.innerHTML = ICON;
+            this.button.classList.add(this.settings.BUTTON_CLASS, 'ytp-button');
+            group.insertBefore(this.button, group.firstChild);
         } else {
-            console.warn('Btn group not found');
+            throw new Error('Btn group not found');
         }
     }
 
     setHandlers() {
-        const btn = document.querySelector(`.${this.btnClass}`);
-
-        if (!btn) {
-            console.warn('Btn not found');
-            return;
-        }
-
-        btn.addEventListener('click', () => {
-            this.port = chrome.runtime.connect({name: "frame"});
-            setInterval(() => {
-                this.getScreenshot();
-            }, 33);
+        this.button.addEventListener('click', () => {
+            if (!this.enabled) {
+                this.enable();
+            } else {
+                this.disable();
+            }
         });
     }
 
-    getScreenshot() {
-        const VIDEO_EL = '#player-api video';
-        const videoEl = document.querySelector(VIDEO_EL);
+    enable() {
+        this.timer = setInterval(() => {
+            this.sendFrame();
+        }, this.settings.UPDATE_FRAME_TIME);
+        this.button.querySelector('img').src = this.settings.DISABLE_ICON_DATA_SRC;
+        this.enabled = true;
+    }
 
-        if (!videoEl) {
-            console.warn('Video not found');
+    disable() {
+        if (this.timer) {
+            clearInterval(this.timer);
+            this.timer = null;
         }
+        if (this.connected) {
+            this.port.postMessage({
+                action: 'reset'
+            });
+        }
+        this.button.querySelector('img').src = this.settings.ENABLE_ICON_DATA_SRC;
+        this.enabled = false;
+    }
 
-        const screenDataURL = NanoTube.getVideoScreenShotAsDataURL(videoEl);
-        this.port.postMessage({data: screenDataURL});
+    sendFrame() {
+        const screenDataURL = this.getVideoScreenShotAsDataURL(this.videoEl);
+        this.port.postMessage({
+            action: 'frame',
+            data: screenDataURL
+        });
     }
 
 
-    static getVideoScreenShotAsDataURL(videoEl) {
-        const canvas = document.createElement("canvas");
-        canvas.width = 38; // todo
-        canvas.height = 38; // todo
-        canvas.getContext('2d').drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-        return canvas.toDataURL();
+    getVideoScreenShotAsDataURL(videoEl) {
+        this.drawContext.drawImage(videoEl, 0, 0, this.tempCanvas.width, this.tempCanvas.height);
+        return this.tempCanvas.toDataURL();
     }
 }
 
