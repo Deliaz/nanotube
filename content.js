@@ -39,6 +39,12 @@ class NanoTube {
             this.connected = false;
             this.disable();
         });
+        this.port.onMessage.addListener(function (msg) {
+            if (msg.action === 'reset') {
+                console.log('reset');
+                this.disable();
+            }
+        });
         this.connected = true;
     }
 

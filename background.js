@@ -12,7 +12,7 @@ chrome.runtime.onConnect.addListener(function (port) {
 });
 
 // TODO reset in case of few ports
-// TODO notify contens about other connections
+// TODO notify content about other connections
 
 const canvas = document.createElement('canvas'); // Create the canvas
 canvas.width = 38;
