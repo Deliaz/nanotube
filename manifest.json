@@ -9,7 +9,7 @@
     "tabs"
   ],
   "browser_action": {
-    "default_title": "Google Mail",
+    "default_title": "nanotube",
     "default_icon": "default-icon.png"
   },
   "background": {
