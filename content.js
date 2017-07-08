@@ -1,3 +1,11 @@
+/*
+ * nanoTube
+ * Deliaz (c) 2017
+ * https://github.com/Deliaz/nanotube
+ *
+ * Content-page script implementation
+ */
+
 class NanoTube {
 	constructor() {
 		this.settings = {
@@ -26,6 +34,9 @@ class NanoTube {
 		this.setHandlers();
 	}
 
+	/**
+	 * Initiates convert-helper canvas
+	 */
 	initCanvas() {
 		this.tempCanvas = document.createElement('canvas');
 		this.tempCanvas.width = this.settings.CANVAS_WIDTH;
@@ -33,6 +44,10 @@ class NanoTube {
 		this.drawContext = this.tempCanvas.getContext('2d');
 	}
 
+
+	/**
+	 * Connects to a opened port in the background page
+	 */
 	connect() {
 		this.port = chrome.runtime.connect({name: 'frame'});
 		this.port.onDisconnect.addListener(() => {
@@ -47,6 +62,10 @@ class NanoTube {
 		this.connected = true;
 	}
 
+
+	/**
+	 * Inserts nanotube action button near youtube's controls
+	 */
 	insertControls() {
 		const ICON = `<img style="width:36px; height: 36px;" src="${this.settings.ENABLE_ICON_DATA_SRC}">`;
 		const RIGHT_BTN_CONTROLS_GROUP = '.ytp-right-controls';
@@ -62,6 +81,10 @@ class NanoTube {
 		}
 	}
 
+
+	/**
+	 * Initiates nanotube button click handler
+	 */
 	setHandlers() {
 		this.button.addEventListener('click', () => {
 			if (!this.enabled) {
@@ -72,6 +95,10 @@ class NanoTube {
 		});
 	}
 
+
+	/**
+	 * Enables nanotube mode
+	 */
 	enable() {
 		this.sendInit();
 		this.timer = setInterval(() => {
@@ -81,6 +108,10 @@ class NanoTube {
 		this.enabled = true;
 	}
 
+
+	/**
+	 * Disables nanotube mode
+	 */
 	disable() {
 		if (this.timer) {
 			clearInterval(this.timer);
@@ -95,12 +126,21 @@ class NanoTube {
 		this.enabled = false;
 	}
 
+
+	/**
+	 * Send init event
+	 * It helps to reset other pages
+	 */
 	sendInit() {
 		this.port.postMessage({
 			action: 'init'
 		});
 	}
 
+
+	/**
+	 * Sends a frame from video to the background script
+	 */
 	sendFrame() {
 		const screenDataURL = this.getVideoScreenShotAsDataURL(this.videoEl);
 		this.port.postMessage({
@@ -110,10 +150,16 @@ class NanoTube {
 	}
 
 
+	/**
+	 * Extracts a frame from video
+	 * @param videoEl {Element}
+	 * @returns {string}
+	 */
 	getVideoScreenShotAsDataURL(videoEl) {
 		this.drawContext.drawImage(videoEl, 0, 0, this.tempCanvas.width, this.tempCanvas.height);
 		return this.tempCanvas.toDataURL();
 	}
 }
 
+// Run app
 new NanoTube();

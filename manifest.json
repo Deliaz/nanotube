@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
-  "name": "nanotube",
-  "short_name": "nanotube",
+  "name": "nanoTube",
+  "short_name": "nanoTube",
   "version": "1.0.0",
   "description": "",
   "author": "Deliaz",
@@ -9,7 +9,7 @@
     "tabs"
   ],
   "browser_action": {
-    "default_title": "nanotube",
+    "default_title": "nanoTube",
     "default_icon": "default-icon.png"
   },
   "background": {
