@@ -60,7 +60,7 @@ function setFrame(dataURL) {
  */
 function reset() {
 	chrome.browserAction.setIcon({
-		path: chrome.runtime.getURL('./default-icon.png')
+		path: chrome.runtime.getURL('./icons/32gray.png')
 	});
 }
 
