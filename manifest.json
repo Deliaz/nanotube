@@ -3,7 +3,7 @@
   "name": "nanoTube",
   "short_name": "nanoTube",
   "version": "1.0.0",
-  "description": "",
+  "description": "Watch YouTube videos in the browser action icon",
   "author": "Deliaz",
   "permissions": [
     "tabs"

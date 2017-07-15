@@ -1,5 +1,7 @@
 # nanoTube
 
-Chrome extension that copies video stream from YouTube to the browser action icon. 
+### Extension for Google Chrome.
 
-Totally useless and was made as an experiment. 
+Allows watching YouTube videos in the browser action icon.
+
+**It doesn't make sense and totally useless. Was made as an experiment.** 
